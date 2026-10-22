@@ -15,11 +15,9 @@ export const builds = [
   "websites",
   "apis",
   "discord bots",
-  "kernels",
   "programming languages",
   "terminal apps",
   "twitter revivals",
-  "minecraft & roblox tools",
 ];
 
 export const axon = {
@@ -118,7 +116,6 @@ export const interests = [
   "roblox",
   "apis",
   "mysql",
-  "kernels",
 ];
 
 export const domains = [
