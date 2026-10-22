@@ -1,5 +1,5 @@
 # Cloudflare Pages config — `npm run deploy` or connect the repo in the dashboard
 # (build command: npm run build, output directory: dist)
-name = "m5rcel-bio"
+name = "m5rcel-main"
 pages_build_output_dir = "dist"
 compatibility_date = "2026-10-01"
