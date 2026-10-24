@@ -1,6 +1,6 @@
 # m5rcel-bio
 
-Minimal dark bio site for m5rcel. Built with Vite, React, TypeScript, Tailwind v4 and [Clover UI](https://cloverui.xyz/docs/introduction).
+guns.lol-style bio page for m5rcel. Custom design built with Vite, React, TypeScript, Tailwind v4 and Motion.
 
 ## Develop
 
@@ -41,14 +41,21 @@ npx wrangler login
 npm run deploy
 ```
 
-## Clover UI components used
+## What's on the page
 
-Glitchy Text (name), Drop Text (bio), Block Text ("i build ___"), Gauge Text (repo count),
-Thinking State ("building meowcord"), Rich Text (axon title), Liquid Button ("say hi"),
-Soft Button (github) and 404 Block (the `404.html` page Cloudflare Pages serves for unknown paths).
+- **Enter screen** (`src/components/bio/enter-screen.tsx`): a fake terminal boot, then "click to enter".
+  The click also unlocks audio, which browsers block until the visitor interacts.
+- **Starfield + cursor sparkles** (`starfield.tsx`): canvas background with mouse parallax and shooting stars.
+- **Profile card** (`App.tsx`, `profile.tsx`): glass card that tilts toward the cursor, X pfp wearing the live
+  Discord avatar decoration and status dot, sparkling name, typewriter taglines, badges and social icons.
+- **Discord presence** (`discord-card.tsx`, `src/lib/lanyard.ts`): live status, custom status, current activity
+  and Spotify through [Lanyard](https://github.com/Phineas/lanyard). Your Discord account must stay in the
+  Lanyard Discord server for this to work.
+- **Generated lo-fi** (`src/lib/ambient.ts`): soft chords, plucks and vinyl crackle made with the Web Audio API.
+  No audio files. Mute button in the bottom-left corner.
+- **Typing tab title** and a **404 page** in the same style (`404.html`, `src/not-found.tsx`).
 
-They're copied from the registry at `https://cloverui.xyz/r/<name>.json` into `src/components/clover/`.
-The only local change: `404-block.tsx` imports the liquid button from `@/components/clover/liquid-button`.
+Text, badges and taglines live in `src/data.ts`.
 
 ## Keyboard shortcuts
 

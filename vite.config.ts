@@ -81,6 +81,8 @@ function discordEmbed(): Plugin {
 
 export default defineConfig({
   plugins: [react(), tailwindcss(), discordEmbed()],
+  // Lets browser code show the site host without importing Node-only code from src/embed.ts.
+  define: { __SITE_HOST__: JSON.stringify(SITE_HOST) },
   build: {
     rollupOptions: {
       // 404.html is served by Cloudflare Pages for unknown paths.

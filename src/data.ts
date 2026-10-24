@@ -8,7 +8,30 @@ export const profile = {
   avatar: "/avatar.jpg",
   bio: "full-stack developer with a habit of wandering into website development, linux, self-hosting and old stuff.",
   email: "contact@m5rcel.com",
+  /** Discord account shown live through Lanyard (https://github.com/Phineas/lanyard). */
+  discordId: "318746314991206400",
 } as const;
+
+/** Lines the profile card types out, one after another. */
+export const taglines = [
+  "full-stack developer from poland",
+  "creator of the axon programming language",
+  "building meowcord with tiago",
+  "linux, self-hosting and old stuff",
+  "i build websites, apis and discord bots",
+];
+
+export type BadgeIcon = "code" | "axon" | "cat" | "arch" | "server" | "globe";
+
+/** Little icons under the name; the label shows on hover. */
+export const badges: { label: string; icon: BadgeIcon }[] = [
+  { label: "full-stack developer", icon: "code" },
+  { label: "creator of axon", icon: "axon" },
+  { label: "building meowcord", icon: "cat" },
+  { label: "arch linux enjoyer", icon: "arch" },
+  { label: "self-hoster", icon: "server" },
+  { label: "old web lover", icon: "globe" },
+];
 
 /** Rotating words for the "i build ___" line. */
 export const builds = [

@@ -5,86 +5,44 @@
 /* Site is always dark: `dark:` utilities apply under <html class="dark">. */
 @custom-variant dark (&:is(.dark *));
 
-:root {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.93 0 0);
-  --card: oklch(0.175 0 0);
-  --muted: oklch(0.22 0 0);
-  --muted-foreground: oklch(0.62 0 0);
-  --subtle-foreground: oklch(0.48 0 0);
-  --primary: oklch(0.93 0 0);
-  --primary-foreground: oklch(0.145 0 0);
-  --secondary: oklch(0.24 0 0);
-  --secondary-foreground: oklch(0.85 0 0);
-  --destructive: oklch(0.6 0.2 25);
-  --destructive-foreground: oklch(0.95 0 0);
-  --border: oklch(1 0 0 / 0.08);
-  --input: oklch(1 0 0 / 0.12);
-  --ring: oklch(0.6 0 0);
-  --accent: oklch(1 0 0);
-  /* axon brand teal (#0FF4C6) */
-  --axon: oklch(0.88 0.16 172);
-  /* used by Spell UI's FlowButton */
-  --rotating-border-color: oklch(1 0 0);
-}
-
 @theme inline {
   --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono Variable", ui-monospace, monospace;
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-subtle-foreground: var(--subtle-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-accent: var(--accent);
-  --color-axon: var(--axon);
 }
 
 @layer base {
-  * {
-    border-color: var(--color-border);
-  }
   html {
-    background: var(--background);
+    background: #050505;
+    color: #fafafa;
     color-scheme: dark;
     -webkit-font-smoothing: antialiased;
   }
   body {
-    /* no background here: html paints it, so the glow layer below stays visible */
-    color: var(--foreground);
     font-family: var(--font-sans);
+    overflow-x: hidden;
   }
   ::selection {
-    background: oklch(1 0 0 / 0.2);
-  }
-  /* soft glow + faint dot grid behind everything */
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background:
-      radial-gradient(60rem 28rem at 50% -8rem, oklch(1 0 0 / 0.05), transparent 70%),
-      radial-gradient(circle at 1px 1px, oklch(1 0 0 / 0.045) 1px, transparent 0) 0 0 / 22px 22px;
-    mask-image: linear-gradient(to bottom, black, transparent 70%);
+    background: rgb(255 255 255 / 0.2);
   }
   a:focus-visible,
-  button:focus-visible {
-    outline: 1px solid var(--ring);
+  button:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 1px solid rgb(255 255 255 / 0.6);
     outline-offset: 3px;
-    border-radius: 4px;
   }
+}
+
+/* Film grain: an SVG noise tile, animated in steps so it shimmers like old footage. */
+.grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 0.8s steps(4) infinite;
+}
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-3%, 2%); }
+  50% { transform: translate(2%, -3%); }
+  75% { transform: translate(-2%, -1%); }
+  100% { transform: translate(0, 0); }
 }
 
 @media (prefers-reduced-motion: reduce) {
