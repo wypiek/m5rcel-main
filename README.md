@@ -1,6 +1,6 @@
 # m5rcel-bio
 
-Minimal dark bio site for m5rcel. Built with Vite, React, TypeScript, Tailwind v4 and [Spell UI](https://spell.sh/docs/components).
+Minimal dark bio site for m5rcel. Built with Vite, React, TypeScript, Tailwind v4 and [Clover UI](https://cloverui.xyz/docs/introduction).
 
 ## Develop
 
@@ -41,14 +41,14 @@ npx wrangler login
 npm run deploy
 ```
 
-## Spell UI components used
+## Clover UI components used
 
-Special Text, Blur Reveal, Text Marquee, Shimmer Text, Words Stagger, Badge, Tilt Card,
-Copy Button, Marquee, Kbd, Flow Button, Fallback Avatar — copied from the registry at
-`https://spell.sh/r/<name>.json` into `src/components/spell/`.
+Glitchy Text (name), Drop Text (bio), Block Text ("i build ___"), Gauge Text (repo count),
+Thinking State ("building meowcord"), Rich Text (axon title), Liquid Button ("say hi"),
+Soft Button (github) and 404 Block (the `404.html` page Cloudflare Pages serves for unknown paths).
 
-Local tweaks for a non-Next.js setup: `marquee.tsx` uses `<style>` instead of `<style jsx>`,
-and `special-text.tsx` uses `ReturnType<typeof setInterval>` instead of `NodeJS.Timeout`.
+They're copied from the registry at `https://cloverui.xyz/r/<name>.json` into `src/components/clover/`.
+The only local change: `404-block.tsx` imports the liquid button from `@/components/clover/liquid-button`.
 
 ## Keyboard shortcuts
 

@@ -23,8 +23,15 @@ function assetVersion() {
 function discordEmbed(): Plugin {
   return {
     name: "discord-embed",
-    transformIndexHtml() {
+    transformIndexHtml(_html, ctx) {
       const v = assetVersion();
+      const icons: HtmlTagDescriptor[] = [
+        { tag: "link", attrs: { rel: "icon", type: "image/png", href: `/favicon.png?v=${v}` }, injectTo: "head" },
+        { tag: "link", attrs: { rel: "apple-touch-icon", href: `/apple-touch-icon.png?v=${v}` }, injectTo: "head" },
+      ];
+      // Only the home page gets the embed and social tags; other pages (404) just get the icons.
+      if (!/(^|\/)index\.html$/.test(ctx.path) && ctx.path !== "/") return icons;
+
       const abs = (path: string) => `${SITE_URL}${path}?v=${v}`;
 
       const payload = buildComponentEmbed(v);
@@ -42,8 +49,7 @@ function discordEmbed(): Plugin {
       const description = profile.bio;
 
       return [
-        { tag: "link", attrs: { rel: "icon", type: "image/png", href: `/favicon.png?v=${v}` }, injectTo: "head" },
-        { tag: "link", attrs: { rel: "apple-touch-icon", href: `/apple-touch-icon.png?v=${v}` }, injectTo: "head" },
+        ...icons,
         { tag: "link", attrs: { rel: "canonical", href: `${SITE_URL}/` }, injectTo: "head" },
 
         // Open Graph fallback, used if Discord can't show the component embed (and by other apps).
@@ -75,6 +81,15 @@ function discordEmbed(): Plugin {
 
 export default defineConfig({
   plugins: [react(), tailwindcss(), discordEmbed()],
+  build: {
+    rollupOptions: {
+      // 404.html is served by Cloudflare Pages for unknown paths.
+      input: {
+        main: fileURLToPath(new URL("./index.html", import.meta.url)),
+        notFound: fileURLToPath(new URL("./404.html", import.meta.url)),
+      },
+    },
+  },
   resolve: {
     alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
   },
