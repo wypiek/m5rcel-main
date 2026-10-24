@@ -1,6 +1,6 @@
 # m5rcel-bio
 
-guns.lol-style bio page for m5rcel. Custom design built with Vite, React, TypeScript, Tailwind v4 and Motion.
+Bio page for m5rcel: one glass profile card with live widgets and a generative music player. Built with Vite, React, TypeScript, Tailwind v4 and Motion.
 
 ## Develop
 
@@ -43,19 +43,18 @@ npm run deploy
 
 ## What's on the page
 
-- **Enter screen** (`src/components/bio/enter-screen.tsx`): a fake terminal boot, then "click to enter".
-  The click also unlocks audio, which browsers block until the visitor interacts.
-- **Starfield + cursor sparkles** (`starfield.tsx`): canvas background with mouse parallax and shooting stars.
-- **Profile card** (`App.tsx`, `profile.tsx`): glass card that tilts toward the cursor, X pfp wearing the live
-  Discord avatar decoration and status dot, sparkling name, typewriter taglines, badges and social icons.
-- **Discord presence** (`discord-card.tsx`, `src/lib/lanyard.ts`): live status, custom status, current activity
-  and Spotify through [Lanyard](https://github.com/Phineas/lanyard). Your Discord account must stay in the
-  Lanyard Discord server for this to work.
-- **Generated lo-fi** (`src/lib/ambient.ts`): soft chords, plucks and vinyl crackle made with the Web Audio API.
-  No audio files. Mute button in the bottom-left corner.
-- **Typing tab title** and a **404 page** in the same style (`404.html`, `src/not-found.tsx`).
+- **Profile card** (`App.tsx`, `src/components/bio/profile.tsx`): X pfp wearing the live Discord avatar
+  decoration and status dot, name with a glowing badge pill, typewriter taglines, glowing social icons,
+  location and local time.
+- **Discord widget** (`widgets.tsx`, `src/lib/lanyard.ts`): live status and current activity through
+  [Lanyard](https://github.com/Phineas/lanyard). Your Discord account must stay in the Lanyard Discord server.
+- **GitHub widget** (`widgets.tsx`): live repo and follower counts from the GitHub API, cached for 10 minutes.
+- **m5rcel radio** (`player.tsx`, `src/lib/ambient.ts`): a music player for generative lo-fi tracks made with
+  the Web Audio API (no audio files). Play/pause, previous/next and progress. Nothing plays until you press play.
+- **Background** (`backdrop.tsx`): drifting violet, amber and magenta light behind dark diagonal bands.
+- **404 page** in the same style (`404.html`, `src/not-found.tsx`).
 
-Text, badges and taglines live in `src/data.ts`.
+Text, badges and taglines live in `src/data.ts`; tracks live in `src/lib/ambient.ts`.
 
 ## Keyboard shortcuts
 

@@ -1,41 +1,158 @@
-// A tiny generative lo-fi soundtrack made with the Web Audio API: soft jazzy chords,
-// occasional pentatonic plucks and faint vinyl crackle, all through a generated reverb.
-// No audio files, so nothing to license or download. Browsers only allow audio after a
-// click, so this starts from the "click to enter" screen.
+// "m5rcel radio": generative lo-fi made with the Web Audio API. Each track is a looping chord
+// progression with random pentatonic plucks and vinyl crackle, through a generated reverb.
+// No audio files, so nothing to license or download. Audio starts only when the visitor
+// presses play, which is also what browsers require.
 
 const midi = (note: number) => 440 * 2 ** ((note - 69) / 12);
 
-// Fmaj9 → Em7 → Dm9 → Cmaj7, voiced low and close.
-const CHORDS = [
-  [53, 57, 60, 64, 67],
-  [52, 55, 59, 62],
-  [50, 53, 57, 60, 64],
-  [48, 52, 55, 59],
-];
-// C major pentatonic, an octave up, for the plucks.
-const PLUCKS = [72, 74, 76, 79, 81, 84];
-const CHORD_SECONDS = 5;
+export type Track = {
+  title: string;
+  /** Two colors for the generated cover art. */
+  cover: [string, string];
+  chords: number[][];
+  plucks: number[];
+  /** Seconds per chord. */
+  bar: number;
+  /** Chance of a pluck on each of 8 steps per bar. */
+  density: number;
+};
 
-export class Ambient {
+export const TRACKS: Track[] = [
+  {
+    title: "late night commits",
+    cover: ["#7c3aed", "#f59e0b"],
+    chords: [[53, 57, 60, 64, 67], [52, 55, 59, 62], [50, 53, 57, 60, 64], [48, 52, 55, 59]],
+    plucks: [72, 74, 76, 79, 81, 84],
+    bar: 5,
+    density: 0.32,
+  },
+  {
+    title: "warsaw rain",
+    cover: ["#0ea5e9", "#1e1b4b"],
+    chords: [[45, 52, 55, 60, 64], [41, 48, 52, 57], [43, 50, 55, 59, 62], [40, 47, 52, 55, 59]],
+    plucks: [69, 72, 74, 76, 79, 81],
+    bar: 6,
+    density: 0.22,
+  },
+  {
+    title: "self-hosted sunsets",
+    cover: ["#f97316", "#db2777"],
+    chords: [[50, 57, 60, 65], [55, 59, 62, 65, 69], [48, 55, 59, 64], [57, 60, 64, 67]],
+    plucks: [74, 77, 79, 81, 84, 86],
+    bar: 4.5,
+    density: 0.4,
+  },
+  {
+    title: "old web dreams",
+    cover: ["#22c55e", "#0f172a"],
+    chords: [[51, 55, 58, 62], [56, 60, 63, 67], [53, 56, 60, 63], [58, 62, 65, 68]],
+    plucks: [70, 72, 75, 77, 79, 82],
+    bar: 5.5,
+    density: 0.28,
+  },
+];
+
+export const trackLength = (track: Track) => track.chords.length * track.bar;
+
+export class Radio {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private dry: GainNode | null = null;
   private wet: GainNode | null = null;
-  private timer: ReturnType<typeof setInterval> | undefined;
+  private timer: ReturnType<typeof setTimeout> | undefined;
+  private voices = new Set<OscillatorNode>();
   private step = 0;
-  private volume = 0.5;
-  muted = false;
+  private trackStart = 0;
+  private pausedAt = 0;
+  index = 0;
+  playing = false;
 
-  start() {
-    if (this.ctx) return;
+  get track() {
+    return TRACKS[this.index];
+  }
+
+  /** Seconds into the current loop of the track. */
+  get elapsed() {
+    if (!this.ctx) return 0;
+    const now = this.playing ? this.ctx.currentTime : this.pausedAt;
+    return Math.max(0, now - this.trackStart) % trackLength(this.track);
+  }
+
+  async play() {
+    if (!this.ctx) this.setup();
+    const ctx = this.ctx!;
+    if (ctx.state === "suspended") await ctx.resume();
+    if (!this.playing) {
+      this.playing = true;
+      if (this.trackStart === 0) this.restart();
+      else {
+        // Resuming: shift the start so elapsed time continues where it paused.
+        this.trackStart += ctx.currentTime - this.pausedAt;
+        this.schedule();
+      }
+      this.fade(0.42, 1.2);
+    }
+  }
+
+  pause() {
+    if (!this.ctx || !this.playing) return;
+    this.playing = false;
+    this.pausedAt = this.ctx.currentTime;
+    clearTimeout(this.timer);
+    this.fade(0, 0.35);
+    setTimeout(() => !this.playing && void this.ctx?.suspend(), 400);
+  }
+
+  skip(direction: 1 | -1) {
+    this.index = (this.index + direction + TRACKS.length) % TRACKS.length;
+    if (!this.ctx) return;
+    this.stopVoices();
+    if (this.playing) this.restart();
+    else {
+      this.step = 0;
+      this.trackStart = this.pausedAt = this.ctx.currentTime;
+    }
+  }
+
+  dispose() {
+    clearTimeout(this.timer);
+    void this.ctx?.close();
+    this.ctx = null;
+  }
+
+  private restart() {
+    const ctx = this.ctx!;
+    clearTimeout(this.timer);
+    this.step = 0;
+    this.trackStart = ctx.currentTime + 0.05;
+    this.schedule();
+  }
+
+  /** Plays the bar due now, then waits for the next one. */
+  private schedule() {
+    const ctx = this.ctx!;
+    const track = this.track;
+    const barIndex = Math.floor(Math.max(0, ctx.currentTime - this.trackStart) / track.bar);
+    this.step = Math.max(this.step, barIndex);
+    const at = Math.max(ctx.currentTime + 0.05, this.trackStart + this.step * track.bar);
+    this.chord(track.chords[this.step % track.chords.length], at, track.bar);
+    for (let beat = 1; beat < 8; beat++) {
+      if (Math.random() < track.density) {
+        this.pluck(track.plucks[Math.floor(Math.random() * track.plucks.length)], at + beat * (track.bar / 8));
+      }
+    }
+    this.step++;
+    const next = this.trackStart + this.step * track.bar;
+    this.timer = setTimeout(() => this.playing && this.schedule(), Math.max(50, (next - ctx.currentTime - 0.15) * 1000));
+  }
+
+  private setup() {
     const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    if (!Ctx) return;
     const ctx = new Ctx();
     this.ctx = ctx;
 
     const compressor = ctx.createDynamicsCompressor();
     compressor.connect(ctx.destination);
-
     this.master = ctx.createGain();
     this.master.gain.value = 0;
     this.master.connect(compressor);
@@ -57,45 +174,26 @@ export class Ambient {
     reverb.connect(tone);
 
     this.crackle();
-    this.applyVolume(3);
-
-    const tick = () => {
-      const at = ctx.currentTime + 0.08;
-      this.chord(CHORDS[this.step % CHORDS.length], at);
-      // A few plucks spread over the bar, never all of them.
-      for (let beat = 1; beat < 8; beat++) {
-        if (Math.random() < 0.32) this.pluck(PLUCKS[Math.floor(Math.random() * PLUCKS.length)], at + beat * (CHORD_SECONDS / 8));
-      }
-      this.step++;
-    };
-    tick();
-    this.timer = setInterval(tick, CHORD_SECONDS * 1000);
   }
 
-  setMuted(muted: boolean) {
-    this.muted = muted;
-    if (this.ctx?.state === "suspended" && !muted) void this.ctx.resume();
-    this.applyVolume(0.4);
-  }
-
-  setVolume(volume: number) {
-    this.volume = Math.max(0, Math.min(1, volume));
-    this.applyVolume(0.15);
-  }
-
-  stop() {
-    clearInterval(this.timer);
-    void this.ctx?.close();
-    this.ctx = null;
-  }
-
-  private applyVolume(fadeSeconds: number) {
+  private fade(target: number, seconds: number) {
     if (!this.ctx || !this.master) return;
-    const target = this.muted ? 0 : this.volume * 0.5;
     const now = this.ctx.currentTime;
     this.master.gain.cancelScheduledValues(now);
     this.master.gain.setValueAtTime(this.master.gain.value, now);
-    this.master.gain.linearRampToValueAtTime(target, now + fadeSeconds);
+    this.master.gain.linearRampToValueAtTime(target, now + seconds);
+  }
+
+  private stopVoices() {
+    const now = this.ctx?.currentTime ?? 0;
+    for (const osc of this.voices) {
+      try {
+        osc.stop(now + 0.05);
+      } catch {
+        // already stopped
+      }
+    }
+    this.voices.clear();
   }
 
   private voice(freq: number, at: number, length: number, peak: number, attack: number, type: OscillatorType, detune = 0) {
@@ -113,15 +211,17 @@ export class Ambient {
     env.connect(this.wet!);
     osc.start(at);
     osc.stop(at + length + 2);
+    this.voices.add(osc);
+    osc.onended = () => this.voices.delete(osc);
   }
 
-  private chord(notes: number[], at: number) {
+  private chord(notes: number[], at: number, bar: number) {
     for (const note of notes) {
       const f = midi(note);
-      this.voice(f, at, CHORD_SECONDS + 1.5, 0.035, 1.4, "sine", -4);
-      this.voice(f, at, CHORD_SECONDS + 1.5, 0.018, 1.6, "triangle", 5);
+      this.voice(f, at, bar + 1.5, 0.035, 1.4, "sine", -4);
+      this.voice(f, at, bar + 1.5, 0.018, 1.6, "triangle", 5);
     }
-    this.voice(midi(notes[0] - 12), at, CHORD_SECONDS + 1, 0.05, 0.8, "sine"); // soft bass
+    this.voice(midi(notes[0] - 12), at, bar + 1, 0.05, 0.8, "sine"); // soft bass
   }
 
   private pluck(note: number, at: number) {
@@ -131,8 +231,7 @@ export class Ambient {
 
   private crackle() {
     const ctx = this.ctx!;
-    const seconds = 4;
-    const buffer = ctx.createBuffer(1, ctx.sampleRate * seconds, ctx.sampleRate);
+    const buffer = ctx.createBuffer(1, ctx.sampleRate * 4, ctx.sampleRate);
     const data = buffer.getChannelData(0);
     for (let i = 0; i < data.length; i++) {
       // Mostly silence with rare clicks, plus a whisper of hiss.

@@ -1,18 +1,18 @@
 @import "tailwindcss";
-@import "@fontsource-variable/geist";
+@import "@fontsource-variable/outfit";
 @import "@fontsource-variable/geist-mono";
 
 /* Site is always dark: `dark:` utilities apply under <html class="dark">. */
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Outfit Variable", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono Variable", ui-monospace, monospace;
 }
 
 @layer base {
   html {
-    background: #050505;
+    background: #07050c;
     color: #fafafa;
     color-scheme: dark;
     -webkit-font-smoothing: antialiased;
@@ -44,6 +44,14 @@
   75% { transform: translate(-2%, -1%); }
   100% { transform: translate(0, 0); }
 }
+
+/* Slow drift for the background light. */
+.drift-a { animation: drift-a 26s ease-in-out infinite alternate; }
+.drift-b { animation: drift-b 32s ease-in-out infinite alternate; }
+.drift-c { animation: drift-c 29s ease-in-out infinite alternate; }
+@keyframes drift-a { to { transform: translate(8vw, 6vh) scale(1.08); } }
+@keyframes drift-b { to { transform: translate(-10vw, 8vh) scale(0.92); } }
+@keyframes drift-c { to { transform: translate(-6vw, -8vh) scale(1.1); } }
 
 @media (prefers-reduced-motion: reduce) {
   *,

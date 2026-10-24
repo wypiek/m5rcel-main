@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { useEffect, useState, type ReactNode } from "react";
+import { useReducedMotion } from "motion/react";
 import { Cat, CodeXml, Globe, Mail, Server } from "lucide-react";
 import { siArchlinux, siDiscord, siGithub, siSteam, siX, type SimpleIcon } from "simple-icons";
 
@@ -17,22 +17,32 @@ export function BrandIcon({ icon, className }: { icon: SimpleIcon; className?: s
   );
 }
 
+/** The axon logo as a single-color mark, so it can glow white like the other badges. */
+function AxonMark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 512 512" aria-hidden className={cn("size-4", className)} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M92 430 L226 82 C235 58 277 58 286 82 L420 430 H350 L321 350 H191 L162 430 Z" strokeWidth="40" />
+      <path d="M256 214 C214 194 177 175 136 145 M256 214 C298 194 335 175 376 145" strokeWidth="26" />
+    </svg>
+  );
+}
+
 const BADGE_ICONS: Record<BadgeIcon, ReactNode> = {
-  code: <CodeXml className="size-4" />,
-  axon: <img src="/axon-logo.svg" alt="" className="size-4 rounded-[3px]" />,
-  cat: <Cat className="size-4" />,
-  arch: <BrandIcon icon={siArchlinux} className="size-3.5" />,
-  server: <Server className="size-4" />,
-  globe: <Globe className="size-4" />,
+  code: <CodeXml className="size-[15px]" strokeWidth={2.4} />,
+  axon: <AxonMark className="size-[15px]" />,
+  cat: <Cat className="size-[15px]" strokeWidth={2.4} />,
+  arch: <BrandIcon icon={siArchlinux} className="size-[13px]" />,
+  server: <Server className="size-[15px]" strokeWidth={2.4} />,
+  globe: <Globe className="size-[15px]" strokeWidth={2.4} />,
 };
 
 export const SOCIAL_ICONS: Record<string, ReactNode> = {
-  github: <BrandIcon icon={siGithub} />,
-  x: <BrandIcon icon={siX} className="size-[18px]" />,
-  discord: <BrandIcon icon={siDiscord} />,
-  steam: <BrandIcon icon={siSteam} />,
-  neocities: <Globe className="size-5" />,
-  email: <Mail className="size-5" />,
+  discord: <BrandIcon icon={siDiscord} className="size-8" />,
+  github: <BrandIcon icon={siGithub} className="size-[30px]" />,
+  x: <BrandIcon icon={siX} className="size-[26px]" />,
+  steam: <BrandIcon icon={siSteam} className="size-[30px]" />,
+  neocities: <Globe className="size-8" strokeWidth={2.2} />,
+  email: <Mail className="size-8" strokeWidth={2.2} />,
 };
 
 // --- tooltip ---
@@ -43,7 +53,7 @@ export function Tooltip({ label, children }: { label: string; children: ReactNod
       {children}
       <span
         role="tooltip"
-        className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 translate-y-1 rounded-md border border-white/10 bg-black/85 px-2 py-1 text-[11px] whitespace-nowrap text-white opacity-0 shadow-lg backdrop-blur transition-all duration-150 group-hover/tip:translate-y-0 group-hover/tip:opacity-100 group-focus-within/tip:translate-y-0 group-focus-within/tip:opacity-100"
+        className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 translate-y-1 rounded-lg border border-white/10 bg-black/85 px-2 py-1 text-[11px] font-medium whitespace-nowrap text-white opacity-0 shadow-lg backdrop-blur transition-all duration-150 group-focus-within/tip:translate-y-0 group-focus-within/tip:opacity-100 group-hover/tip:translate-y-0 group-hover/tip:opacity-100"
       >
         {label}
       </span>
@@ -54,19 +64,12 @@ export function Tooltip({ label, children }: { label: string; children: ReactNod
 // --- avatar ---
 
 /** X pfp wearing the live Discord avatar decoration, with a status dot. */
-export function ProfileAvatar({ src, presence, size = 104 }: { src: string; presence: LanyardPresence | null; size?: number }) {
+export function ProfileAvatar({ src, presence, size = 120 }: { src: string; presence: LanyardPresence | null; size?: number }) {
   const decoration = presence?.discord_user.avatar_decoration_data?.asset;
   const status = presence ? STATUS_META[presence.discord_status] : null;
   return (
-    <div className="relative" style={{ width: size, height: size }}>
-      <div className="absolute -inset-3 rounded-full bg-white/10 blur-2xl" aria-hidden />
-      <img
-        src={src}
-        alt="m5rcel's avatar"
-        width={size}
-        height={size}
-        className="relative size-full rounded-full object-cover ring-2 ring-white/10"
-      />
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      <img src={src} alt="m5rcel's avatar" width={size} height={size} className="size-full rounded-full object-cover" />
       {decoration && (
         // Discord decorations are drawn for a frame 1.2x the avatar size.
         <img
@@ -78,13 +81,9 @@ export function ProfileAvatar({ src, presence, size = 104 }: { src: string; pres
         />
       )}
       {status && (
-        <span className="absolute right-[3%] bottom-[3%]">
+        <span className="absolute right-[4%] bottom-[4%]">
           <Tooltip label={status.label}>
-            <span
-              tabIndex={0}
-              className="block size-5 rounded-full border-[3.5px] border-[#141414]"
-              style={{ background: status.color }}
-            />
+            <span tabIndex={0} className="block size-6 rounded-full border-4 border-[#120d18]" style={{ background: status.color }} />
           </Tooltip>
         </span>
       )}
@@ -92,45 +91,20 @@ export function ProfileAvatar({ src, presence, size = 104 }: { src: string; pres
   );
 }
 
-// --- sparkling name ---
+// --- badges ---
 
-type Sparkle = { id: number; x: number; y: number; size: number; delay: number };
-
-/** Glowing display name with little stars twinkling around it. */
-export function SparkleName({ children }: { children: string }) {
-  const reduce = useReducedMotion();
-  const sparkles = useMemo<Sparkle[]>(
-    () =>
-      Array.from({ length: 9 }, (_, id) => ({
-        id,
-        x: Math.random() * 110 - 5,
-        y: Math.random() * 120 - 10,
-        size: Math.random() * 6 + 5,
-        delay: Math.random() * 2.4,
-      })),
-    [],
-  );
-
+/** Row of small glowing icons in a pill next to the name. */
+export function BadgePill() {
   return (
-    <span className="relative inline-block">
-      {!reduce &&
-        sparkles.map((s) => (
-          <motion.svg
-            key={s.id}
-            viewBox="0 0 24 24"
-            aria-hidden
-            className="pointer-events-none absolute fill-white"
-            style={{ left: `${s.x}%`, top: `${s.y}%`, width: s.size, height: s.size }}
-            animate={{ scale: [0, 1, 0], rotate: [0, 90], opacity: [0, 1, 0] }}
-            transition={{ duration: 1.6, delay: s.delay, repeat: Infinity, repeatDelay: 1.2 + s.delay }}
-          >
-            <path d="M12 0c.6 6.6 5.4 11.4 12 12-6.6.6-11.4 5.4-12 12-.6-6.6-5.4-11.4-12-12C6.6 11.4 11.4 6.6 12 0z" />
-          </motion.svg>
-        ))}
-      <span className="relative text-white [text-shadow:0_0_18px_rgba(255,255,255,0.55),0_0_42px_rgba(255,255,255,0.18)]">
-        {children}
-      </span>
-    </span>
+    <div className="flex items-center gap-[7px] rounded-full border border-white/10 bg-white/[0.08] px-2.5 py-1.5">
+      {badges.map((b) => (
+        <Tooltip key={b.label} label={b.label}>
+          <span tabIndex={0} className="flex text-white [filter:drop-shadow(0_0_5px_rgba(255,255,255,0.65))]">
+            {BADGE_ICONS[b.icon]}
+          </span>
+        </Tooltip>
+      ))}
+    </div>
   );
 }
 
@@ -163,32 +137,12 @@ export function Typewriter({ lines, className }: { lines: string[]; className?: 
   return (
     <p className={className} aria-label={lines.join(". ")}>
       <span aria-hidden>{text}</span>
-      <span aria-hidden className="ml-0.5 inline-block h-[1.05em] w-[2px] translate-y-[0.18em] animate-pulse bg-white/80" />
+      <span aria-hidden className="ml-0.5 inline-block h-[1.05em] w-[2px] translate-y-[0.18em] animate-pulse bg-white/90" />
     </p>
   );
 }
 
 // --- small hooks ---
-
-/** guns.lol-style tab title that types itself out, then clears and starts over. */
-export function useTypingTitle(title: string) {
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const chars = Array.from(title);
-    let i = 0;
-    let dir = 1;
-    const id = setInterval(() => {
-      i += dir;
-      if (i >= chars.length + 6) dir = -1; // hold the full title for a few ticks
-      if (i <= 0) dir = 1;
-      document.title = chars.slice(0, Math.max(1, Math.min(i, chars.length))).join("") + (i < chars.length ? "_" : "");
-    }, 260);
-    return () => {
-      clearInterval(id);
-      document.title = title;
-    };
-  }, [title]);
-}
 
 export function useLocalTime(timeZone: string) {
   const [time, setTime] = useState(() => formatTime(timeZone));
@@ -201,22 +155,3 @@ export function useLocalTime(timeZone: string) {
 
 const formatTime = (timeZone: string) =>
   new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", timeZone }).format(new Date());
-
-// --- badges ---
-
-export function BadgeIcons() {
-  return (
-    <div className="mt-4 flex flex-wrap justify-center gap-1.5">
-      {badges.map((b) => (
-        <Tooltip key={b.label} label={b.label}>
-          <span
-            tabIndex={0}
-            className="flex size-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04] text-white/80 transition-colors hover:border-white/25 hover:text-white"
-          >
-            {BADGE_ICONS[b.icon]}
-          </span>
-        </Tooltip>
-      ))}
-    </div>
-  );
-}
