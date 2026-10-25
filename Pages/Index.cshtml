@@ -1,0 +1,218 @@
+@page
+@model IndexModel
+@{
+    var github = Model.GitHub;
+}
+<div class="bento">
+    <section class="window card card-profile" aria-labelledby="card-profile">
+        <div class="title-bar"><h2 class="title-bar-text" id="card-profile">about me</h2></div>
+        <div class="window-body has-space">
+            <div class="profile-head">
+                <img class="avatar" src="~/img/avatar.jpg" asp-append-version="true" alt="" width="96" height="96" />
+                <div>
+                    <h1 class="profile-name">@Profile.Handle</h1>
+                    <p class="instruction">@Profile.Name · full-stack developer · @Profile.Location</p>
+                </div>
+            </div>
+            <p role="tooltip" class="profile-balloon">currently building <a href="@Profile.Meowcord.Url">meowcord</a> with <a href="@Profile.Meowcord.Partner.Href">tiago</a>, cofounding <a href="#card-xitter">xitter</a> and looking after <a href="#card-axon">axon</a>.</p>
+            <p class="profile-bio">@Profile.Bio</p>
+            <dl class="profile-facts">
+                @* The page can be a static file, so the time is filled in by site.js. *@
+                <div><dt>local time</dt><dd>warsaw, <time id="local-time" data-zone="@Profile.TimeZone">central european time</time></dd></div>
+                <div><dt>into</dt><dd>@string.Join(" · ", Profile.Interests)</dd></div>
+            </dl>
+            <div class="button-row">
+                <a role="button" href="mailto:@Profile.Email">@Profile.Email</a>
+                <a role="button" href="@Profile.GitHub.Url" rel="me">github</a>
+                <a role="button" href="https://x.com/m5rcode" rel="me">x</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="window card card-links" aria-labelledby="card-links">
+        <div class="title-bar"><h2 class="title-bar-text" id="card-links">find me</h2></div>
+        <div class="window-body has-space">
+            <ul class="link-grid">
+                @foreach (var link in Profile.Links)
+                {
+                    <li><a role="button" href="@link.Href" rel="me" title="@link.Href"><span>@link.Label</span><span class="link-handle">@link.Handle</span></a></li>
+                }
+            </ul>
+        </div>
+    </section>
+
+    <section class="window card" aria-labelledby="card-github">
+        <div class="title-bar"><h2 class="title-bar-text" id="card-github">github</h2></div>
+        <div class="window-body has-space">
+            <table class="stat-table">
+                <tbody>
+                    <tr><th scope="row">public repos</th><td>@github.PublicRepos</td></tr>
+                    <tr><th scope="row">followers</th><td>@github.Followers</td></tr>
+                    <tr><th scope="row">following</th><td>@github.Following</td></tr>
+                    <tr><th scope="row">since</th><td>@Profile.GitHub.Since</td></tr>
+                </tbody>
+            </table>
+            <p class="card-note">from the github api, @((github.FetchedAt ?? Profile.GitHub.AsOf).ToString("d MMM yyyy").ToLowerInvariant())</p>
+            <div class="button-row"><a role="button" href="@Profile.GitHub.Url?tab=repositories">browse repos</a></div>
+        </div>
+    </section>
+
+    <section class="window card" aria-labelledby="card-now">
+        <div class="title-bar"><h2 class="title-bar-text" id="card-now">right now</h2></div>
+        <div class="window-body has-space">
+            <div class="now-item">
+                <p id="now-meowcord"><a href="@Profile.Meowcord.Url">meowcord</a></p>
+                <div role="progressbar" class="marquee" aria-labelledby="now-meowcord" aria-valuetext="in progress"></div>
+                <p class="card-note">in progress, with tiago</p>
+            </div>
+            <div class="now-item">
+                <p id="now-xitter"><a href="#card-xitter">xitter</a></p>
+                <div role="progressbar" class="marquee" aria-labelledby="now-xitter" aria-valuetext="in progress"></div>
+                <p class="card-note">cofounding</p>
+            </div>
+            <div class="now-item">
+                <p id="now-axon"><a href="#card-axon">axon</a></p>
+                <div role="progressbar" class="animate is-full" aria-labelledby="now-axon" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><div></div></div>
+                <p class="card-note">@Profile.Axon.Version is out</p>
+            </div>
+            <div class="now-item">
+                <p id="now-m5rcode"><a href="@Profile.M5rcode.Url">m5rcode</a></p>
+                <div role="progressbar" class="paused is-full" aria-labelledby="now-m5rcode" aria-valuetext="on hold"><div></div></div>
+                <p class="card-note">on hold for now</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="window card card-wide" aria-labelledby="card-axon">
+        <div class="title-bar"><h2 class="title-bar-text" id="card-axon">axon</h2></div>
+        <div class="window-body has-space">
+            <p class="instruction instruction-primary">the axon programming language</p>
+            <p class="instruction">@Profile.Axon.Tagline</p>
+            <section class="tabs" data-tabs>
+                <menu role="tablist" aria-label="axon" hidden>
+                    <button role="tab" id="tab-axon-overview" aria-controls="axon-overview" aria-selected="true">overview</button>
+                    <button role="tab" id="tab-axon-sample" aria-controls="axon-sample" aria-selected="false">sample</button>
+                    <button role="tab" id="tab-axon-tools" aria-controls="axon-tools" aria-selected="false">tools</button>
+                </menu>
+                <article role="tabpanel" id="axon-overview" aria-labelledby="tab-axon-overview">
+                    <ul class="plain-list">
+                        @foreach (var feature in Profile.Axon.Features)
+                        {
+                            <li>@feature</li>
+                        }
+                    </ul>
+                    <p class="card-note">@Profile.Axon.Version · @Profile.Axon.License license · @Profile.Axon.Platforms</p>
+                </article>
+                <article role="tabpanel" id="axon-sample" aria-labelledby="tab-axon-sample">
+                    <pre class="code"><code>@Profile.Axon.Sample</code></pre>
+                </article>
+                <article role="tabpanel" id="axon-tools" aria-labelledby="tab-axon-tools">
+                    <p>@string.Join(" · ", Profile.Axon.Tools)</p>
+                    <p class="card-note">start a project with <code>@Profile.Axon.Quickstart</code></p>
+                </article>
+            </section>
+            <div class="button-row">
+                @foreach (var link in Profile.Axon.Links)
+                {
+                    <a role="button" href="@link.Href" title="@link.Handle">@link.Label</a>
+                }
+            </div>
+        </div>
+    </section>
+
+    <section class="window card" aria-labelledby="card-meowcord">
+        <div class="title-bar"><h2 class="title-bar-text" id="card-meowcord">meowcord</h2></div>
+        <div class="window-body has-space">
+            <p class="instruction instruction-primary">meowcord</p>
+            <p>@Profile.Meowcord.Description</p>
+            <p class="card-note">typescript · @github.MeowcordStars stars · built with <a href="@Profile.Meowcord.Partner.Href">@Profile.Meowcord.Partner.Handle</a></p>
+            <div class="button-row card-end">
+                <a role="button" href="@Profile.Meowcord.Url">repo</a>
+                <a role="button" href="@Profile.Meowcord.X.Href">@Profile.Meowcord.X.Handle</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="window card" aria-labelledby="card-xitter">
+        <div class="title-bar"><h2 class="title-bar-text" id="card-xitter">xitter</h2></div>
+        <div class="window-body has-space">
+            <p class="instruction instruction-primary">xitter</p>
+            <p>@Profile.Xitter.Description</p>
+            <p class="card-note">i'm cofounding it · typescript · @Profile.Xitter.License · @github.XitterStars stars</p>
+            <details>
+                <summary>what works</summary>
+                <ul class="plain-list">
+                    @foreach (var feature in Profile.Xitter.Features)
+                    {
+                        <li>@feature</li>
+                    }
+                </ul>
+            </details>
+            <div class="button-row card-end">
+                <a role="button" href="@Profile.Xitter.Url">repo</a>
+                <a role="button" href="@Profile.Xitter.Site">xitter.space</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="window card card-projects" aria-labelledby="card-projects">
+        <div class="title-bar"><h2 class="title-bar-text" id="card-projects">fresh from the oven</h2></div>
+        <div class="window-body has-space">
+            <div class="table-wrap has-scrollbar">
+                <table class="project-table">
+                    <thead>
+                        <tr><th scope="col">name</th><th scope="col">language</th><th scope="col" class="num">stars</th><th scope="col">what it is</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var project in Profile.Projects)
+                        {
+                            <tr>
+                                <td><a href="@IndexModel.RepoUrl(project)">@project.Name</a></td>
+                                <td>@project.Lang</td>
+                                <td class="num">@(project.Stars > 0 ? project.Stars.ToString() : "")</td>
+                                <td title="@project.Description">@project.Description</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="button-row"><a role="button" href="@Profile.GitHub.Url?tab=repositories">all @github.PublicRepos repos</a></div>
+        </div>
+    </section>
+
+    <section class="window card card-stack" aria-labelledby="card-stack">
+        <div class="title-bar"><h2 class="title-bar-text" id="card-stack">ingredients</h2></div>
+        <div class="window-body has-space">
+            <ul class="tree-view has-container has-connector">
+                @foreach (var group in Profile.Stack)
+                {
+                    <li>
+                        @group.Label
+                        <ul>
+                            @foreach (var item in group.Items)
+                            {
+                                <li>@item</li>
+                            }
+                        </ul>
+                    </li>
+                }
+            </ul>
+        </div>
+    </section>
+
+    <section class="window card card-full" aria-labelledby="card-domains">
+        <div class="title-bar"><h2 class="title-bar-text" id="card-domains">domains</h2></div>
+        <div class="window-body has-space">
+            <ul class="tree-view has-container domain-list">
+                @foreach (var domain in Profile.Domains)
+                {
+                    <li><a href="https://@domain">@domain</a></li>
+                }
+            </ul>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <script src="~/js/site.js" asp-append-version="true" defer></script>
+}

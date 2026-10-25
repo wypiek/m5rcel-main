@@ -1,0 +1,7 @@
+bin/
+obj/
+.tools/
+dist/
+.env
+*.user
+.vs/

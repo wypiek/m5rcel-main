@@ -1,0 +1,39 @@
+@{
+    var site = SiteSettings.Value;
+    var title = ViewData["Title"] as string;
+    var canonical = site.Absolute(Context.Request.Path.Value ?? "/");
+}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="@Profile.Description" />
+    <meta name="theme-color" content="#4580c4" />
+    <title>@(title is null ? Profile.Handle : $"{title} — {Profile.Handle}")</title>
+    <link rel="icon" type="image/png" href="~/img/favicon.png" asp-append-version="true" />
+    <link rel="stylesheet" href="~/vendor/7.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="canonical" href="@canonical" />
+    <meta property="og:title" content="@(title ?? Profile.Handle)" />
+    <meta property="og:description" content="@Profile.Description" />
+    <meta property="og:url" content="@canonical" />
+    <meta property="og:image" content="@site.Absolute("/img/avatar.jpg")" />
+    <meta property="og:type" content="profile" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@("@m5rcode")" />
+</head>
+<body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <main id="main" class="site-width" tabindex="-1">
+        @RenderBody()
+    </main>
+    <footer class="site-footer status-bar">
+        <p class="status-bar-field">@Profile.Handle · @Profile.Location</p>
+        <p class="status-bar-field">written in razor pages</p>
+        <p class="status-bar-field">styled with <a href="https://khang-nd.github.io/7.css/">7.css</a></p>
+        <p class="status-bar-field">© @DateTime.UtcNow.Year</p>
+    </footer>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

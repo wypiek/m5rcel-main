@@ -1,0 +1,19 @@
+@page "{code:int?}"
+@{
+    var code = int.TryParse(RouteData.Values["code"] as string, out var parsed) ? parsed : 404;
+    var (heading, text) = code switch {
+        404 => ("page not found", "this page doesn't exist, or it was an experimental batch."),
+        >= 500 => ("something broke", "the server tripped over something. try again in a moment."),
+        _ => ("request failed", "that request couldn't be handled."),
+    };
+    ViewData["Title"] = heading;
+    if (HttpContext.Response.StatusCode == 200 && code is >= 400 and < 600) HttpContext.Response.StatusCode = code;
+}
+<section class="window card status-page" aria-labelledby="status-title">
+    <div class="title-bar"><h1 class="title-bar-text" id="status-title">error @code</h1></div>
+    <div class="window-body has-space">
+        <p class="instruction instruction-primary">@heading</p>
+        <p class="instruction">@text</p>
+        <div class="button-row"><a role="button" href="/">back to m5rcel</a></div>
+    </div>
+</section>

@@ -1,0 +1,17 @@
+services:
+  site:
+    build: .
+    image: m5rcel-win7:latest
+    restart: unless-stopped
+    environment:
+      Site__Url: ${SITE_URL:-https://m5rcel.com}
+      AllowedHosts: ${ALLOWED_HOSTS:-*}
+      # Docker's default bridge gateway, so host Caddy's X-Forwarded-* headers are trusted.
+      ReverseProxy__KnownNetworks__0: ${PROXY_NETWORK:-172.16.0.0/12}
+    ports:
+      - "127.0.0.1:${PORT:-8080}:8080"
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
